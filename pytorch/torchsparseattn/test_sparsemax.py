@@ -1,6 +1,6 @@
-from .sparsemax import SparsemaxFunction
 import torch
 from torch.autograd import gradcheck, Variable
+from .sparsemax import SparsemaxFunction
 
 
 def test_sparsemax():
