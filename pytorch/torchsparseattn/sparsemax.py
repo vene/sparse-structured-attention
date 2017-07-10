@@ -8,9 +8,6 @@ import numpy as np
 import torch
 from torch import autograd as ta
 
-def project_simplex(tensor):
-    pass
-
 
 def project_simplex_andre(a, radius=1.0):
     '''Project point a to the probability simplex.
@@ -62,11 +59,10 @@ def sparsemax_grad(dout, w_star):
     masked -= masked.sum() / supp.sum()
     out = dout.new(dout.size()).zero_()
     out[supp] = masked
-    print(w_star)
     return(out)
 
 
-class Sparsemax(ta.Function):
+class SparsemaxFunction(ta.Function):
 
     def forward(self, v):
         w = project_simplex(v)
@@ -83,10 +79,11 @@ class Sparsemax(ta.Function):
 
 
 if __name__ == '__main__':
-    rng = np.random.RandomState(0)
     from timeit import timeit
-    x = np.random.randn(5).astype(np.float32)
+    rng = np.random.RandomState(0)
+    x = rng.randn(5).astype(np.float32)
     x_tn = torch.from_numpy(x)
+    print("benchmarking")
     print(timeit("project_simplex_andre(x)", globals=globals()))
     print(timeit("project_simplex_numpy(x)", globals=globals()))
     print(timeit("project_simplex(x_tn)", globals=globals()))
