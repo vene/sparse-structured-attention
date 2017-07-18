@@ -4,7 +4,10 @@ from setuptools import setup, find_packages, Extension
 extensions = [
     Extension('torchsparseattn._isotonic',
               ["torchsparseattn/_isotonic.c"],
-              include_dirs=[numpy.get_include()])
+              include_dirs=[numpy.get_include()]),
+    Extension('torchsparseattn._fused_jv',
+              ["torchsparseattn/_fused_jv.c"],
+              include_dirs=[])
 ]
 
 

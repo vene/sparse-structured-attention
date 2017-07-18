@@ -3,7 +3,8 @@ from sklearn.utils.testing import assert_allclose
 import torch
 from torch.autograd import gradcheck, Variable
 
-from .fused import fused_prox_jv_slow, fused_prox_jv_la, FusedProxFunction
+from .fused import fused_prox_jv_slow, fused_prox_jv_la, fused_prox_jv_fast
+from .fused import FusedProxFunction
 
 
 def test_jv():
@@ -17,7 +18,9 @@ def test_jv():
 
         din_1 = fused_prox_jv_la(y_hat, dout)
         din_2 = fused_prox_jv_slow(y_hat, dout)
+        din_3 = fused_prox_jv_fast(y_hat, dout)
         assert_allclose(din_1.numpy(), din_2.numpy(), rtol=1e-5)
+        assert_allclose(din_1.numpy(), din_3.numpy(), rtol=1e-5)
 
 
 @pytest.mark.parametrize('alpha', [0.001, 0.01, 0.1, 1])

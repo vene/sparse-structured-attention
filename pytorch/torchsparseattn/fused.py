@@ -12,9 +12,10 @@ import torch
 from torch import autograd as ta
 
 from lightning.impl.penalty import prox_tv1d
+from ._fused_jv import _inplace_fused_prox_jv
 
 
-def fused_prox_jv_slow(y_hat, dout):
+def _inplace_fused_prox_jv_slow(y_hat, dout):
     """not efficient in python for long seqs, but template for a cython impl"""
 
     n_features = len(dout)
@@ -31,6 +32,18 @@ def fused_prox_jv_slow(y_hat, dout):
         else:
             acc += dout[i]
             n += 1
+    return dout
+
+
+def fused_prox_jv_slow(y_hat, dout):
+    dout = dout.clone()
+    _inplace_fused_prox_jv_slow(y_hat, dout)
+    return dout
+
+
+def fused_prox_jv_fast(y_hat, dout):
+    dout = dout.clone()
+    _inplace_fused_prox_jv(y_hat.numpy(), dout.numpy())
     return dout
 
 
@@ -64,7 +77,8 @@ class FusedProxFunction(ta.Function):
             return None
 
         y_hat, = self.saved_tensors
-        dout = fused_prox_jv_slow(y_hat, dout)
+        dout = dout.clone()
+        _inplace_fused_prox_jv(y_hat.numpy(), dout.numpy())
 
         return dout
 
@@ -81,6 +95,9 @@ if __name__ == '__main__':
         dout = torch.arange(0, dim)
         print("dimension={}".format(dim))
         print("slow", timeit("fused_prox_jv_slow(y_hat, dout)",
+                             globals=globals(),
+                             number=10000))
+        print("fast", timeit("fused_prox_jv_fast(y_hat, dout)",
                              globals=globals(),
                              number=10000))
         print("la", timeit("fused_prox_jv_la(y_hat, dout)",
