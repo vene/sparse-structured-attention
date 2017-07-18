@@ -1,5 +1,7 @@
 """Fusedmax attention
 
+Clusters neighboring attention weights into groups with equal weight.
+
 A Regularized Framework for Sparse and Structured Neural Attention
 Vlad Niculae, Mathieu Blondel
 https://arxiv.org/abs/1705.07704
@@ -33,9 +35,7 @@ def fused_prox_jv_slow(y_hat, dout):
 
 
 def fused_prox_jv_la(y_hat, dout):
-    """linear algebraic impl. not worth it, according to benchmarks
-
-    useful for testing"""
+    """vectorized implementation; slower on small sizes according to tests"""
     y_hat = y_hat.numpy()
     dim = len(y_hat)
     bounds = np.cumsum(np.ediff1d(y_hat, to_begin=0) != 0)
@@ -51,10 +51,10 @@ class FusedProxFunction(ta.Function):
     def __init__(self, alpha=1):
         self.alpha = alpha
 
-    def forward(self, v):
-        v_np = v.numpy().copy()
-        prox_tv1d(v_np, self.alpha)  # requires lightning/master for 32bit
-        y_hat = torch.from_numpy(v_np)
+    def forward(self, x):
+        x_np = x.numpy().copy()
+        prox_tv1d(x_np, self.alpha)  # requires lightning/master for 32bit
+        y_hat = torch.from_numpy(x_np)
         self.save_for_backward(y_hat)
         return y_hat
 
@@ -71,13 +71,19 @@ class FusedProxFunction(ta.Function):
 
 if __name__ == '__main__':
     from timeit import timeit
-    #  torch.manual_seed(1)
-    x = torch.randn(50)
-    x_var = ta.Variable(x, requires_grad=True)
-    y_hat = FusedProxFunction()(x_var).data
+    torch.manual_seed(1)
 
-    dout = torch.arange(0, 50)
-    print("benchmarking")
-    print("slow", timeit("fused_prox_jv_slow(y_hat, dout)", globals=globals()))
-    print("la", timeit("fused_prox_jv_la(y_hat, dout)", globals=globals()))
+    for dim in (5, 10, 50, 100, 500, 1000):
+
+        x = torch.randn(dim)
+        x_var = ta.Variable(x, requires_grad=True)
+        y_hat = FusedProxFunction()(x_var).data
+        dout = torch.arange(0, dim)
+        print("dimension={}".format(dim))
+        print("slow", timeit("fused_prox_jv_slow(y_hat, dout)",
+                             globals=globals(),
+                             number=10000))
+        print("la", timeit("fused_prox_jv_la(y_hat, dout)",
+                           globals=globals(),
+                           number=10000))
 
