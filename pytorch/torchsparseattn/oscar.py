@@ -15,21 +15,22 @@ from .isotonic import isotonic_regression
 
 def oscar_prox_jv_numpy(y_hat, dout):
     y_hat = y_hat.numpy()
+    din = dout.clone().zero_()
     dout = dout.numpy()
-    sign = np.sign(y_hat) * np.sign(np.dot(y_hat, dout))
+    din_np = din.numpy()
+
+    sign = np.sign(y_hat)
     y_hat = np.abs(y_hat)
 
     uniq, inv, counts = np.unique(y_hat, return_inverse=True,
                                   return_counts=True)
     n_unique = len(uniq)
-    n_features = len(y_hat)
-    tmp = np.zeros((n_features, n_unique), dtype=y_hat.dtype)
-    tmp[np.arange(n_features), inv] = dout
-    tmp = tmp.sum(axis=0)
+    tmp = np.zeros((n_unique,), dtype=y_hat.dtype)
+    np.add.at(tmp, inv, dout * sign)
     tmp /= counts
-    tmp.take(inv, mode='clip', out=dout)
-    dout *= sign
-    return torch.from_numpy(dout).clone()
+    tmp.take(inv, mode='clip', out=din_np)
+    din_np *= sign
+    return din
 
 
 def prox_owl(v, w):
