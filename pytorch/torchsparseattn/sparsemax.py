@@ -13,11 +13,11 @@ def project_simplex_andre(a, radius=1.0):
     '''Project point a to the probability simplex.
     Returns the projected point x and the residual value.'''
     x0 = a.copy()
-    d = len(x0);
+    d = len(x0)
     ind_sort = np.argsort(-x0)
     y0 = x0[ind_sort]
     ycum = np.cumsum(y0)
-    val = 1.0/np.arange(1,d+1) * (ycum - radius)
+    val = 1.0 / np.arange(1, d + 1) * (ycum - radius)
     ind = np.nonzero(y0 > val)[0]
     rho = ind[-1]
     tau = val[rho]
@@ -87,4 +87,3 @@ if __name__ == '__main__':
     print(timeit("project_simplex_andre(x)", globals=globals()))
     print(timeit("project_simplex_numpy(x)", globals=globals()))
     print(timeit("project_simplex(x_tn)", globals=globals()))
-

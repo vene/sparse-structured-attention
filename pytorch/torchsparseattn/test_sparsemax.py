@@ -9,4 +9,3 @@ def test_sparsemax():
         func = SparsemaxFunction()
         x = Variable(torch.randn(20), requires_grad=True)
         assert gradcheck(func, (x,), eps=1e-4, atol=1e-3)
-

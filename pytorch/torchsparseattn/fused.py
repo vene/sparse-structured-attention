@@ -7,12 +7,11 @@ Vlad Niculae, Mathieu Blondel
 https://arxiv.org/abs/1705.07704
 """
 
-import numpy as np
 import torch
 from torch import autograd as ta
+import warnings
 
 from lightning.impl.penalty import prox_tv1d
-from ._fused_jv import _inplace_fused_prox_jv
 
 
 def _inplace_fused_prox_jv_slow(y_hat, dout):
@@ -35,6 +34,14 @@ def _inplace_fused_prox_jv_slow(y_hat, dout):
     return dout
 
 
+try:
+    from ._fused_jv import _inplace_fused_prox_jv
+except ImportError:
+    warnings.warn("Could not import cython implementation of fused backward "
+                  "pass. Slow implementation used instead.")
+    _inplace_fused_prox_jv = _inplace_fused_prox_jv_slow
+
+
 def fused_prox_jv_slow(y_hat, dout):
     dout = dout.clone()
     _inplace_fused_prox_jv_slow(y_hat, dout)
@@ -45,18 +52,6 @@ def fused_prox_jv_fast(y_hat, dout):
     dout = dout.clone()
     _inplace_fused_prox_jv(y_hat.numpy(), dout.numpy())
     return dout
-
-
-def fused_prox_jv_la(y_hat, dout):
-    """vectorized implementation; slower on small sizes according to tests"""
-    y_hat = y_hat.numpy()
-    dim = len(y_hat)
-    bounds = np.cumsum(np.ediff1d(y_hat, to_begin=0) != 0)
-    L = np.zeros((dim, bounds[-1] + 1), dtype=y_hat.dtype)
-    L[np.arange(dim), bounds] = 1
-    L /= np.sqrt(L.sum(axis=0))
-    L_t = torch.from_numpy(L)
-    return torch.mv(L_t, torch.mv(L_t.t(), dout))
 
 
 class FusedProxFunction(ta.Function):
@@ -100,7 +95,3 @@ if __name__ == '__main__':
         print("fast", timeit("fused_prox_jv_fast(y_hat, dout)",
                              globals=globals(),
                              number=10000))
-        print("la", timeit("fused_prox_jv_la(y_hat, dout)",
-                           globals=globals(),
-                           number=10000))
-

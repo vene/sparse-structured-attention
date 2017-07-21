@@ -13,7 +13,7 @@ from torch import autograd as ta
 from .isotonic import isotonic_regression
 
 
-def oscar_prox_jv_numpy(y_hat, dout):
+def oscar_prox_jv(y_hat, dout):
     y_hat = y_hat.numpy()
     din = dout.clone().zero_()
     dout = dout.numpy()
@@ -96,7 +96,7 @@ class OscarProxFunction(ta.Function):
             return None
 
         y_hat, = self.saved_tensors
-        dout = oscar_prox_jv_numpy(y_hat, dout)
+        dout = oscar_prox_jv(y_hat, dout)
         return dout
 
 
@@ -115,10 +115,6 @@ if __name__ == '__main__':
             val.backward()
 
         print("dimension={}".format(dim))
-        #  print("slow", timeit("fused_prox_jv_slow(y_hat, dout)",
-                             #  globals=globals(),
-                             #  number=10000))
         print("la", timeit("_run_backward(x_var)",
                            globals=globals(),
                            number=10000))
-
