@@ -9,8 +9,12 @@ https://arxiv.org/abs/1705.07704
 
 import numpy as np
 import torch
+from torch import nn
 from torch import autograd as ta
+
 from .isotonic import isotonic_regression
+from .base import _BaseBatchProjection
+from .sparsemax import SparsemaxFunction
 
 
 def oscar_prox_jv(y_hat, dout):
@@ -65,7 +69,7 @@ def _oscar_weights(alpha, beta, size):
     return w
 
 
-class OscarProxFunction(ta.Function):
+class OscarProxFunction(_BaseBatchProjection):
     """Proximal operator of the OSCAR regularizer.
 
     ||w||_oscar = alpha ||w||_1 + beta * sum_i<j max { |w_i|, |w_j| }
@@ -77,27 +81,37 @@ class OscarProxFunction(ta.Function):
     The ordered weighted L1 norm: Atomic formulation, dual norm,
     and projections.
     eprint http://arxiv.org/abs/1409.4271
+
+    Backward pass is described in:
+    V. Niculae, M. Blondel,
+    A Regularized Framework for Sparse and Structured Neural Attention.
+    eprint https://arxiv.org/abs/1705.07704
     """
 
     def __init__(self, alpha=0, beta=1):
         self.alpha = alpha
         self.beta = beta
 
-    def forward(self, x):
+    def project(self, x):
         x_np = x.numpy().copy()
         weights = _oscar_weights(self.alpha, self.beta, x_np.shape[0])
         y_hat_np = prox_owl(x_np, weights)
         y_hat = torch.from_numpy(y_hat_np)
-        self.save_for_backward(y_hat)
         return y_hat
 
-    def backward(self, dout):
-        if not self.needs_input_grad[0]:
-            return None
+    def project_jv(self, dout, y_hat):
+        return oscar_prox_jv(y_hat, dout)
 
-        y_hat, = self.saved_tensors
-        dout = oscar_prox_jv(y_hat, dout)
-        return dout
+
+class Oscarmax(nn.Module):
+    def __init__(self, beta=1):
+        self.beta = beta
+        super(Oscarmax, self).__init__()
+
+    def forward(self, x, lengths=None):
+        oscar_prox = OscarProxFunction(beta=self.beta)
+        sparsemax = SparsemaxFunction()
+        return sparsemax(oscar_prox(x, lengths), lengths)
 
 
 if __name__ == '__main__':

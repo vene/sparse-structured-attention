@@ -8,10 +8,13 @@ https://arxiv.org/abs/1705.07704
 """
 
 import torch
+from torch import nn
 from torch import autograd as ta
 import warnings
-
 from lightning.impl.penalty import prox_tv1d
+
+from .base import _BaseBatchProjection
+from .sparsemax import SparsemaxFunction
 
 
 def _inplace_fused_prox_jv_slow(y_hat, dout):
@@ -54,28 +57,32 @@ def fused_prox_jv_fast(y_hat, dout):
     return dout
 
 
-class FusedProxFunction(ta.Function):
+class FusedProxFunction(_BaseBatchProjection):
 
     def __init__(self, alpha=1):
         self.alpha = alpha
 
-    def forward(self, x):
+    def project(self, x):
         x_np = x.numpy().copy()
         prox_tv1d(x_np, self.alpha)  # requires lightning/master for 32bit
         y_hat = torch.from_numpy(x_np)
-        self.save_for_backward(y_hat)
         return y_hat
 
-    def backward(self, dout):
-
-        if not self.needs_input_grad[0]:
-            return None
-
-        y_hat, = self.saved_tensors
+    def project_jv(self, dout, y_hat):
         dout = dout.clone()
         _inplace_fused_prox_jv(y_hat.numpy(), dout.numpy())
-
         return dout
+
+
+class Fusedmax(nn.Module):
+    def __init__(self, alpha=1):
+        self.alpha = alpha
+        super(Fusedmax, self).__init__()
+
+    def forward(self, x, lengths=None):
+        fused_prox = FusedProxFunction(self.alpha)
+        sparsemax = SparsemaxFunction()
+        return sparsemax(fused_prox(x, lengths), lengths)
 
 
 if __name__ == '__main__':

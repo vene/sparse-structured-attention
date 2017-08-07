@@ -6,7 +6,8 @@ In: Proc. of ICML 2016, https://arxiv.org/abs/1602.02068
 
 import numpy as np
 import torch
-from torch import autograd as ta
+from torch import nn
+from .base import _BaseBatchProjection
 
 
 def project_simplex_andre(a, radius=1.0):
@@ -62,23 +63,23 @@ def sparsemax_grad(dout, w_star):
     return(out)
 
 
-class SparsemaxFunction(ta.Function):
+class SparsemaxFunction(_BaseBatchProjection):
 
-    def forward(self, v):
-        w = project_simplex(v)
-        self.save_for_backward(w)
-        return w
+    def project(self, x):
+        return project_simplex(x)
 
-    def backward(self, dout):
-
-        if not self.needs_input_grad[0]:
-            return None
-
-        w, = self.saved_tensors
-        return sparsemax_grad(dout, w)
+    def project_jv(self, dout, y_star):
+        return sparsemax_grad(dout, y_star)
 
 
-if __name__ == '__main__':
+class Sparsemax(nn.Module):
+
+    def forward(self, x, lengths=None):
+        sparsemax = SparsemaxFunction()
+        return sparsemax(x, lengths)
+
+
+def _bench():
     from timeit import timeit
     rng = np.random.RandomState(0)
     x = rng.randn(5).astype(np.float32)
@@ -87,3 +88,35 @@ if __name__ == '__main__':
     print(timeit("project_simplex_andre(x)", globals=globals()))
     print(timeit("project_simplex_numpy(x)", globals=globals()))
     print(timeit("project_simplex(x_tn)", globals=globals()))
+
+if __name__ == '__main__':
+    from torch.autograd import Variable
+
+    n_samples = 5
+    max_len = 10
+    rng = np.random.RandomState(0)
+    X = np.zeros((n_samples, max_len))
+    mask = np.zeros((n_samples, max_len), dtype=np.int)
+    for i in range(n_samples):
+        # choose sequence length:
+        d = rng.randint(0, max_len + 1)
+        #  d = max_len
+        X[i, :d] = rng.randn(d)
+        mask[i, :d] = 1
+
+    X_tn = Variable(torch.from_numpy(X).float(), requires_grad=True)
+    mask_tn = Variable(torch.from_numpy(mask).byte())
+    lengths = mask_tn.long().sum(1).detach()
+    data = Variable(torch.randn(n_samples, 50, max_len))
+    targets = Variable(torch.randn(n_samples))
+
+    print(X_tn)
+    sm = SparsemaxFunction()
+    y = sm(X_tn, lengths)
+    print(y)
+    # compute a semblance of attention layer regression
+    pred = torch.bmm(data, y.unsqueeze(2)).squeeze(2).mean(1)
+    obj = ((pred - targets) ** 2).mean()
+    obj.backward()
+
+    print(X_tn.grad)
