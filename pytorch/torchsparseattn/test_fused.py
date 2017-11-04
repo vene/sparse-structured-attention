@@ -1,5 +1,5 @@
 import pytest
-from sklearn.utils.testing import assert_allclose
+from numpy.testing import assert_allclose
 import torch
 from torch.autograd import gradcheck, Variable
 
