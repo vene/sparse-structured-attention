@@ -1,6 +1,7 @@
 # Sparse and structured attention mechanisms
+[![Build Status](https://travis-ci.org/vene/sparseattn.svg?branch=master)](https://travis-ci.org/vene/sparseattn)
 
-<p align="center"><img width="40%" src="fusedmax.png" /></p>
+<p align="center"><img src="fusedmax.png" /></p>
 
 --------------------------------------------------------------------------------
 
