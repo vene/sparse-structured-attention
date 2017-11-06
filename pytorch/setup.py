@@ -12,8 +12,8 @@ extensions = [
 
 
 setup(name="torchsparseattn",
-      version="0.1",
-      description="Sparse attention mechanisms for pytorch",
+      version="0.1.dev0",
+      description="Sparse structured attention mechanisms for pytorch",
       author="Vlad Niculae",
       author_email="vlad@vene.ro",
       license="BSD 3-clause",
