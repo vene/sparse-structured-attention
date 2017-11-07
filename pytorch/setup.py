@@ -1,14 +1,17 @@
 import numpy
 from setuptools import setup, find_packages, Extension
 
+from Cython.Build import cythonize
+
 extensions = [
     Extension('torchsparseattn._isotonic',
-              ["torchsparseattn/_isotonic.c"],
+              ["torchsparseattn/_isotonic.pyx"],
               include_dirs=[numpy.get_include()]),
     Extension('torchsparseattn._fused_jv',
-              ["torchsparseattn/_fused_jv.c"],
-              include_dirs=[])
+              ["torchsparseattn/_fused_jv.pyx"])
 ]
+
+extensions = cythonize(extensions)
 
 
 setup(name="torchsparseattn",
