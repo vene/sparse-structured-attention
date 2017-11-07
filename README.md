@@ -1,5 +1,6 @@
 # Sparse and structured attention mechanisms
 [![Build Status](https://travis-ci.org/vene/sparse-structured-attention.svg?branch=master)](https://travis-ci.org/vene/sparse-structured-attention)
+[![PyPI version](https://badge.fury.io/py/torchsparseattn.svg)](https://badge.fury.io/py/torchsparseattn)
 
 <p align="center"><img src="fusedmax.png" /></p>
 
