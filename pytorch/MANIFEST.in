@@ -1,0 +1,2 @@
+include MANIFEST.in
+recursive-include torchsparseattn *.c *.h *.cpp *.pyx *.pxd
