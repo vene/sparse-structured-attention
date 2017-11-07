@@ -8,7 +8,9 @@
 Efficient implementation of structured sparsity inducing
 attention mechanisms: fusedmax, oscarmax and sparsemax.
 
-Currently available for pytorch v2. Requirements: numpy, lightning.
+Currently available for pytorch v0.2. Requires python
+(3.6, 3.5, or 2.7), cython, numpy, scipy, scikit-learn,
+and [lightning](http://contrib.scikit-learn.org/lightning/).
 
 For details, check out our paper:
 
