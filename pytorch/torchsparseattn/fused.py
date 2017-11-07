@@ -7,6 +7,8 @@ Vlad Niculae, Mathieu Blondel
 https://arxiv.org/abs/1705.07704
 """
 
+from __future__ import division
+
 import torch
 from torch import nn
 from torch import autograd as ta
