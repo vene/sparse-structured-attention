@@ -5,7 +5,6 @@ backported from scikit-learn pull request
 https://github.com/scikit-learn/scikit-learn/pull/9106"""
 
 import numpy as np
-from sklearn.utils import as_float_array
 
 from ._isotonic import _inplace_contiguous_isotonic_regression
 
@@ -55,7 +54,7 @@ def isotonic_regression(y, sample_weight=None, y_min=None, y_max=None,
     by Michael J. Best and Nilotpal Chakravarti, section 3.
     """
     order = np.s_[:] if increasing else np.s_[::-1]
-    y = as_float_array(y)
+    # y = as_float_array(y)  # avoid sklearn dependency; we always pass arrays
     y = np.array(y[order], dtype=y.dtype)
     if sample_weight is None:
         sample_weight = np.ones(len(y), dtype=y.dtype)
