@@ -11,9 +11,9 @@ attention mechanisms: fusedmax, oscarmax and sparsemax.
 
 **Note**: If you are just looking for sparsemax, I recommend the implementation in [this OpenNMT-py module](https://github.com/OpenNMT/OpenNMT-py/blob/master/onmt/modules/sparse_activations.py#L41)
 
-Currently available for pytorch <=0.3.1. Requires python
-(3.6, 3.5, or 2.7), cython, numpy, scipy, scikit-learn,
-and [lightning](http://contrib.scikit-learn.org/lightning/).
+Currently available for pytorch >= 0.4.1. (For older versions, use a previous
+release of this package.) Requires python (3.6, 3.5, or 2.7), cython, numpy, 
+scipy, scikit-learn, and [lightning](http://contrib.scikit-learn.org/lightning/).
 
 For details, check out our paper:
 

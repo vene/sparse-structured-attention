@@ -51,7 +51,7 @@ def test_jv(alpha):
         ref = _fused_prox_jacobian(y_hat, dout)
         din_slow = fused_prox_jv_slow(y_hat, dout)
         din_fast = fused_prox_jv_fast(y_hat, dout)
-        # assert_allclose(ref.numpy(), din_slow.numpy(), atol=1e-5)
+        assert_allclose(ref.numpy(), din_slow.numpy(), atol=1e-5)
         assert_allclose(ref.numpy(), din_fast.numpy(), atol=1e-5)
 
 
