@@ -35,7 +35,7 @@ def _oscar_prox_jacobian(y_star, dout=None):
 def test_jv(alpha, beta):
 
     torch.manual_seed(1)
-    torch.set_default_tensor_type(torch.DoubleTensor)
+    torch.set_default_tensor_type('torch.DoubleTensor')
 
     for _ in range(30):
         x = Variable(torch.randn(15))
@@ -51,7 +51,7 @@ def test_jv(alpha, beta):
 @pytest.mark.parametrize('beta', [0.001, 0.01, 0.1, 1])
 def test_finite_diff(alpha, beta):
     torch.manual_seed(1)
-    torch.set_default_tensor_type(torch.DoubleTensor)
+    torch.set_default_tensor_type('torch.DoubleTensor')
 
     for _ in range(30):
         x = Variable(torch.randn(20), requires_grad=True)

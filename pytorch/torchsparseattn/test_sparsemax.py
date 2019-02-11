@@ -6,7 +6,7 @@ from .sparsemax import SparsemaxFunction
 def test_sparsemax():
 
     torch.manual_seed(1)
-    torch.set_default_tensor_type(torch.DoubleTensor)
+    torch.set_default_tensor_type('torch.DoubleTensor')
 
     for _ in range(30):
         func = SparsemaxFunction()
