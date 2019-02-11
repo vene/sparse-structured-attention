@@ -28,7 +28,9 @@ class _BaseBatchProjection(ta.Function):
         if requires_squeeze:
             y_star = y_star.squeeze()
 
+        self.mark_non_differentiable(y_star)
         if has_lengths:
+            self.mark_non_differentiable(lengths)
             self.save_for_backward(y_star, lengths)
         else:
             self.save_for_backward(y_star)

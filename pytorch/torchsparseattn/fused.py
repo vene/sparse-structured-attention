@@ -55,7 +55,7 @@ def fused_prox_jv_slow(y_hat, dout):
 
 def fused_prox_jv_fast(y_hat, dout):
     dout = dout.clone()
-    _inplace_fused_prox_jv(y_hat.numpy(), dout.numpy())
+    _inplace_fused_prox_jv(y_hat.detach().numpy(), dout.numpy())
     return dout
 
 
@@ -65,14 +65,14 @@ class FusedProxFunction(_BaseBatchProjection):
         self.alpha = alpha
 
     def project(self, x):
-        x_np = x.numpy().copy()
+        x_np = x.detach().numpy().copy()
         prox_tv1d(x_np, self.alpha)  # requires lightning/master for 32bit
         y_hat = torch.from_numpy(x_np)
         return y_hat
 
     def project_jv(self, dout, y_hat):
         dout = dout.clone()
-        _inplace_fused_prox_jv(y_hat.numpy(), dout.numpy())
+        _inplace_fused_prox_jv(y_hat.detach().numpy(), dout.numpy())
         return dout
 
 

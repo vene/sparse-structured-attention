@@ -18,7 +18,7 @@ from .sparsemax import SparsemaxFunction
 
 
 def oscar_prox_jv(y_hat, dout):
-    y_hat = y_hat.numpy()
+    y_hat = y_hat.detach().numpy()
     din = dout.clone().zero_()
     dout = dout.numpy()
     din_np = din.numpy()
@@ -93,7 +93,7 @@ class OscarProxFunction(_BaseBatchProjection):
         self.beta = beta
 
     def project(self, x):
-        x_np = x.numpy().copy()
+        x_np = x.detach().numpy().copy()
         weights = _oscar_weights(self.alpha, self.beta, x_np.shape[0])
         y_hat_np = prox_owl(x_np, weights)
         y_hat = torch.from_numpy(y_hat_np)
