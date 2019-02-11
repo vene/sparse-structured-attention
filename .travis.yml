@@ -1,9 +1,14 @@
 sudo: false
 language: python
+
 python:
   - "2.7"
-  - "3.5"
   - "3.6"
+  - "3.7"
+
+env:
+  - TORCH_VERSION=0.4.1
+  - TORCH_VERSION=0.3.1
 
 install:
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
@@ -15,7 +20,7 @@ install:
   - conda info -a
   - conda create -q -n testenv python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-learn pytest cython
   - source activate testenv
-  - conda install -c soumith pytorch
+  - conda install -c pytorch pytorch=$TORCH_VERSION
   - pip install sklearn-contrib-lightning
   # install package
   - cd pytorch
