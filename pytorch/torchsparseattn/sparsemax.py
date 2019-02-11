@@ -28,7 +28,8 @@ def project_simplex(v, z=1):
 def sparsemax_grad(dout, w_star):
     supp = w_star > 0
     masked = dout.masked_select(supp)
-    masked -= masked.sum() / supp.sum()
+    nnz = supp.to(dtype=dout).sum()
+    masked -= masked.sum() / nnz
     out = dout.new(dout.size()).zero_()
     out[supp] = masked
     return(out)
