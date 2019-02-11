@@ -1,14 +1,14 @@
 sudo: false
 language: python
+dist: xenial
 
 python:
   - "2.7"
-  - "3.6"
   - "3.7"
 
 env:
-  - TORCH_VERSION=0.4.1
   - TORCH_VERSION=0.3.1
+  - TORCH_VERSION=0.2
 
 install:
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
