@@ -52,7 +52,8 @@ def test_attention(projection):
     optim = torch.optim.SGD(regr.parameters(), lr=0.0001)
 
     pred = regr(X, lengths)
-    init_obj = loss_func(pred, targets).data.numpy()[0]
+
+    init_obj = loss_func(pred, targets)
 
     for it in range(50):
         optim.zero_grad()
@@ -61,6 +62,6 @@ def test_attention(projection):
         obj.backward()
         optim.step()
 
-    final_obj = obj.data.numpy()[0]
+    final_obj = obj
     assert final_obj < init_obj
     assert regr.attn_template.grad.size() == (n_features,)

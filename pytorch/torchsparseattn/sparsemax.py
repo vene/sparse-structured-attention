@@ -17,7 +17,7 @@ from .base import _BaseBatchProjection
 def project_simplex(v, z=1):
     v_sorted, _ = torch.sort(v, dim=0, descending=True)
     cssv = torch.cumsum(v_sorted, dim=0) - z
-    ind = torch.arange(1, 1 + len(v))
+    ind = torch.arange(1, 1 + len(v)).to(dtype=v.dtype)
     cond = v_sorted - cssv / ind > 0
     rho = ind.masked_select(cond)[-1]
     tau = cssv.masked_select(cond)[-1] / rho
@@ -28,7 +28,8 @@ def project_simplex(v, z=1):
 def sparsemax_grad(dout, w_star):
     supp = w_star > 0
     masked = dout.masked_select(supp)
-    masked -= masked.sum() / supp.sum()
+    nnz = supp.to(dtype=dout.dtype).sum()
+    masked -= masked.sum() / nnz
     out = dout.new(dout.size()).zero_()
     out[supp] = masked
     return(out)
