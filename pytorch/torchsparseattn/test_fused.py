@@ -11,10 +11,10 @@ from .fused import FusedProxFunction
 
 def _fused_prox_jacobian(y_hat, dout=None):
     """reference naive implementation: construct the jacobian"""
-    dim = y_hat.size()[0]
+    dim = y_hat.shape[0]
     groups = torch.zeros(dim)
     J = torch.zeros(dim, dim)
-    current_group = groups[0]
+    current_group = 0
 
     for i in range(1, dim):
         if y_hat[i] == y_hat[i - 1]:
@@ -27,7 +27,7 @@ def _fused_prox_jacobian(y_hat, dout=None):
         for j in range(dim):
             if groups[i] == groups[j]:
                 n_fused = (groups == groups[i]).sum()
-                J[i, j] = 1 / n_fused
+                J[i, j] = 1 / n_fused.to(y_hat.dtype)
 
     if dout is not None:
         return torch.mv(J, dout)
@@ -44,7 +44,9 @@ def test_jv(alpha):
     for _ in range(30):
         x = Variable(torch.randn(15))
         dout = torch.randn(15)
+
         y_hat = FusedProxFunction(alpha=alpha)(x).data
+
 
         ref = _fused_prox_jacobian(y_hat, dout)
         din_slow = fused_prox_jv_slow(y_hat, dout)

@@ -7,8 +7,11 @@ extensions = [
     Extension('torchsparseattn._isotonic',
               ["torchsparseattn/_isotonic.pyx"],
               include_dirs=[numpy.get_include()]),
+    Extension('torchsparseattn._fused',
+              ["torchsparseattn/_fused.pyx"],
+              include_dirs=[numpy.get_include()]),
     Extension('torchsparseattn._fused_jv',
-              ["torchsparseattn/_fused_jv.pyx"])
+              ["torchsparseattn/_fused_jv.pyx"]),
 ]
 
 extensions = cythonize(extensions)
