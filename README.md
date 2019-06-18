@@ -14,6 +14,19 @@ attention mechanisms: fusedmax, oscarmax and sparsemax.
 Currently available for pytorch >= 0.4.1. (For older versions, use a previous
 release of this package.) Requires python >= 2.7, cython, numpy, scipy.
 
+Usage example:
+
+```python
+
+In [1]: import torch
+In [2]: import torchsparseattn
+In [3]: a = torch.tensor([1, 2.1, 1.9], dtype=torch.double)
+In [4]: lengths = torch.tensor([3])
+In [5]: fusedmax = torchsparseattn.Fusedmax(alpha=.1)
+In [6]: fusedmax(a, lengths)
+Out[6]: tensor([0.0000, 0.5000, 0.5000], dtype=torch.float64)
+```
+
 For details, check out our paper:
 
 > Vlad Niculae and Mathieu Blondel
