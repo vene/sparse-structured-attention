@@ -9,7 +9,7 @@
 Efficient implementation of structured sparsity inducing
 attention mechanisms: fusedmax, oscarmax and sparsemax.
 
-**Note**: If you are just looking for sparsemax, I recommend the implementation in [this OpenNMT-py module](https://github.com/OpenNMT/OpenNMT-py/blob/master/onmt/modules/sparse_activations.py#L41)
+**Note**: If you are just looking for sparsemax, I recommend the implementation in the [entmax](https://github.com/deep-spin/entmax).
 
 Currently available for pytorch >= 0.4.1. (For older versions, use a previous
 release of this package.) Requires python >= 2.7, cython, numpy, scipy.
